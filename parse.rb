@@ -4,9 +4,9 @@ file_name = "BlindBolt"
 
 date = DateTime.now
 date = "#{date.month}-#{date.day}-#{date.year}"
-$new_file_name = "#{file_name}-#{date}.CSV"
-qb = CSV.read('items.csv', :encoding => 'windows-1251:utf-8')
-web = CSV.read("bb1.csv")
+$new_file_name = "#{file_name}-#{date}.csv"
+qb = CSV.read('../csv/quickbooks.csv', :encoding => 'windows-1251:utf-8')
+web = CSV.read("../csv/bb.csv")
 
 $items_checked = 0
 $items_changed = 0
@@ -84,7 +84,7 @@ def report
 end
 
 def write_file(web)
-  CSV.open("#{$new_file_name}", "wb") do |csv|
+  CSV.open("../csv/#{$new_file_name}", "wb") do |csv|
     web.each do |web_item|
       csv << web_item
     end

@@ -1,8 +1,7 @@
-require 'date'
-# require 'csv'
-# qb = CSV.read('items.csv', :encoding => 'windows-1251:utf-8')
-# web = CSV.read("bb.csv")
-# newfile = CSV.open('newfile.csv')
+
+require 'csv'
+qb = CSV.read('../csv/quickbooks.csv', :encoding => 'windows-1251:utf-8')
+web = CSV.read("../csv/pearl.csv")
 
 # web.each do |item|
 #   if item[47] != "" && item[47].include?('$') && item[45] == "True"
@@ -18,19 +17,39 @@ require 'date'
 #     end
 #   end
 # end
+i = 0
+web.each do |item|
+  if item[47] != ""
+    sample = item[47]
 
-# web.each do |item|
-#   if item[47] != ""
-#     sample = item[47]
+    sample = sample.split(" ")
+    sample = sample.last.split("$")
+    sample = sample.pop
+    if sample.to_i == item[13].to_i
+      puts 'true'
+    end
+    p "#{sample} #{item[13]}"
+    # sample = sample.join(" ")
+    # p "#{sample} :: #{item[4]} :: #{item[13]}"
+    i += 1
+  end
+end
 
-#     sample = sample.split(" ")
-#     sample.pop
-#     sample << "$5.45"
-#     sample = sample.join(" ")
-#     p "#{sample} :: #{item[4]}"
-#   end
-# end
-date = DateTime.now
-p "#{date.month}-#{date.day}-#{date.year}"
+def check_message(web_item)
+  if web_item[47] != ""
+    puts "Fixing Price Message"
+    msg = web_item[47]
+    msg = msg.split(" ")
+    msg.pop
+    msg << "$#{'%.2f' % $qbCP}"
+    msg = msg.join(" ")
+    puts "#{web_item[47]} -> #{msg}"
+    puts "*********************"
+    web_item[47] = msg
+    puts "\n"
+    puts "\n"
+  end
+end
+
 
 

@@ -1,7 +1,6 @@
 require 'csv'
-qb = CSV.read('items.csv', :encoding => 'windows-1251:utf-8')
-web = CSV.read("bb.csv")
-newfile = CSV.open('newfile.csv')
+qb = CSV.read('../csv/quickbooks.csv', :encoding => 'windows-1251:utf-8')
+web = CSV.read("../csv/pearl.csv")
 
 $items_checked = 0
 $changed_made = 0
@@ -13,7 +12,10 @@ $webCP = 0
 def runner_code(web, qb)
   web.each do |web_item|
     part_number_match(web_item, qb)
+    $items_checked += 1
   end
+  puts "Items checked :: #{$items_checked}"
+  puts "Issues found :: #{$changed_made}"
 end
 
 def part_number_match(web_item, qb)
@@ -23,6 +25,7 @@ def part_number_match(web_item, qb)
     $webPN = web_item[4]
     if $qbPN == $webPN && enabled == "True"
       price_check(web_item, qb_item)
+      $changed_made += 1
     end
   end
 end
