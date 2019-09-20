@@ -6,7 +6,7 @@ date = DateTime.now
 date = "#{date.month}-#{date.day}-#{date.year}"
 $new_file_name = "#{file_name}-#{date}.csv"
 qb = CSV.read('../csv/quickbooks.csv', :encoding => 'windows-1251:utf-8')
-web = CSV.read("../csv/bb.csv")
+web = CSV.read("../csv/pearl.csv")
 
 $items_checked = 0
 $items_changed = 0
@@ -14,6 +14,9 @@ $qbPN = 0
 $qbCP = 0
 $webPN = 0
 $webCP = 0
+$msg = ""
+$needs_fix = false
+$msg_needs_fix = false
 
 def runner_code(web, qb)
   web.each do |web_item|
@@ -22,7 +25,7 @@ def runner_code(web, qb)
   end
   report
   if $items_changed > 0
-    write_file(web)
+    # write_file(web)
   end
 end
 
@@ -31,17 +34,22 @@ def part_number_match(web_item, qb)
     enabled = web_item[45]
     $qbPN = qb_item[1].split(/:/)[1]
     $webPN = web_item[4]
-    if $qbPN == $webPN && enabled == "True"
+    if $qbPN == $webPN
       price_check(web_item, qb_item)
     end
   end
 end
 
 def price_check(web_item, qb_item)
+  $msg = web_item[47]
   $webCP = web_item[13].delete('.').to_i
   $webCP = $webCP / 10000.00
   $qbCP = qb_item[4].to_f
   if $webCP != $qbCP
+    $needs_fix = true
+    check_multiples(web_item, qb_item)
+  end
+  if $needs_fix == true
     $items_changed += 1
     #check multiples
     puts "*********************"
@@ -50,8 +58,20 @@ def price_check(web_item, qb_item)
     puts "Web = $#{$webCP} -> QB = $#{$qbCP}"
     price_change(web_item, qb_item)
     check_message(web_item)
+    $needs_fix = false
   end
 end
+
+def check_multiples(web_item, qb_item)
+  msg_break = $msg.split(' ')
+
+  if msg_break != []
+    if $webCP.to_f == $qbCP.to_f * msg_break[4].to_i
+      $needs_fix = false
+    end
+  end
+end
+
 
 def price_change(web_item, qb_item)
   puts "------------------"
@@ -62,19 +82,38 @@ def price_change(web_item, qb_item)
 end
 
 def check_message(web_item)
-  if web_item[47] != ""
+  $msg_needs_fix = false
+  $msg = web_item[47]
+  msg_break = $msg.split(' ')
+  if $msg != "" && $qbCP.to_f * msg_break[4].to_i == msg_break.last.split('$').last.to_f
+    multiple_msg(web_item, msg_break)
+  elsif $msg != "" && msg_break.last.split('$').last.to_f != $qbCP
+    # p msg_break.last.split('$').last.to_f
+    # puts "#{$qbCP}"
+    basic_msg(web_item, msg_break)
+  end
+  if $msg_needs_fix == true
     puts "Fixing Price Message"
-    msg = web_item[47]
-    msg = msg.split(" ")
-    msg.pop
-    msg << "$#{'%.2f' % $qbCP}"
-    msg = msg.join(" ")
-    puts "#{web_item[47]} -> #{msg}"
+    puts "#{web_item[47]} -> #{$msg}"
     puts "*********************"
-    web_item[47] = msg
+    web_item[47] = $msg
     puts "\n"
     puts "\n"
   end
+end
+
+def multiple_msg(web_item, msg_break)
+  msg_break.pop
+  msg_break << "$#{'%.2f' % ($qbCP * msg_break[4].to_f)}"
+  $msg = msg_break.join(" ")
+  $msg_needs_fix = true
+end
+
+def basic_msg(web_item, msg_break)
+  msg_break.pop
+  msg_break << "$#{'%.2f' % $qbCP}"
+  $msg = msg_break.join(" ")
+  $msg_needs_fix = true
 end
 
 def report
