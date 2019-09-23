@@ -42,31 +42,31 @@ end
 
 def price_check(web_item, qb_item)
   $msg = web_item[47]
-  $webCP = web_item[13].delete('.').to_i
-  $webCP = $webCP / 10000.00
-  $qbCP = qb_item[4].to_f
+  $webCP = ('%.2f' % web_item[13]).delete('.').to_i
+  $qbCP = ('%.2f' % qb_item[4]).delete('.').to_i
   if $webCP != $qbCP
     $needs_fix = true
     check_multiples(web_item, qb_item)
   end
   if $needs_fix == true
     $items_changed += 1
-    #check multiples
     puts "*********************"
     puts "Discrepancy Found ::"
     puts "#{$webPN}"
-    puts "Web = $#{$webCP} -> QB = $#{$qbCP}"
+    puts "Web = $#{($webCP / 100.00)} -> QB = $#{'%.2f' % ($qbCP / 100.00)}"
     price_change(web_item, qb_item)
-    check_message(web_item)
+    if $msg != ""
+      check_message(web_item)
+    end
     $needs_fix = false
   end
 end
 
 def check_multiples(web_item, qb_item)
   msg_break = $msg.split(' ')
-
+  packsize_price = $qbCP * msg_break[4].to_i
   if msg_break != []
-    if $webCP.to_f == $qbCP.to_f * msg_break[4].to_i
+    if $webCP == packsize_price
       $needs_fix = false
     end
   end
@@ -76,8 +76,9 @@ end
 def price_change(web_item, qb_item)
   puts "------------------"
   puts "Fixing Discrepancy"
-  web_item[13] = '%.2f' % $qbCP.to_s
-  puts "Web = $#{web_item[13]} <- QB = $#{$qbCP}"
+  new_price = ($qbCP / 100.00).to_s
+  web_item[13] = new_price
+  puts "Web = $#{'%.2f' % web_item[13]} <- QB = $#{'%.2f' % ($qbCP / 100.00)}"
   puts "------------------"
 end
 
@@ -85,11 +86,10 @@ def check_message(web_item)
   $msg_needs_fix = false
   $msg = web_item[47]
   msg_break = $msg.split(' ')
-  if $msg != "" && $qbCP.to_f * msg_break[4].to_i == msg_break.last.split('$').last.to_f
+  msg_price = ('%.2f' % msg_break.last.split('$').last).delete('.').to_i
+  if $msg != "" && $qbCP * msg_break[4].to_i == msg_price
     multiple_msg(web_item, msg_break)
-  elsif $msg != "" && msg_break.last.split('$').last.to_f != $qbCP
-    # p msg_break.last.split('$').last.to_f
-    # puts "#{$qbCP}"
+  elsif $msg != "" && msg_price != $qbCP
     basic_msg(web_item, msg_break)
   end
   if $msg_needs_fix == true
@@ -104,14 +104,16 @@ end
 
 def multiple_msg(web_item, msg_break)
   msg_break.pop
-  msg_break << "$#{'%.2f' % ($qbCP * msg_break[4].to_f)}"
+  new_price = '%.2f' % (($qbCP * msg_break[4].to_i) / 100.00)
+  msg_break << "$#{new_price}"
   $msg = msg_break.join(" ")
   $msg_needs_fix = true
 end
 
 def basic_msg(web_item, msg_break)
   msg_break.pop
-  msg_break << "$#{'%.2f' % $qbCP}"
+  new_price = '%.2f' % ($qbCP / 100.00)
+  msg_break << "$#{new_price}"
   $msg = msg_break.join(" ")
   $msg_needs_fix = true
 end
