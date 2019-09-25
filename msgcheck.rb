@@ -17,26 +17,39 @@ web = CSV.read("../csv/webproducts.csv")
 #     end
 #   end
 # end
-# i = 0
-web.each do |item|
-    if item[47] != ""
-  puts "#{item[4]}  ::   #{item[47]}"
-#   if item[47] != ""
-#     sample = item[47]
 
-#     sample = sample.split(" ")
-#     sample = sample.last.split("$")
-#     sample = sample.pop
-#     if sample.to_i == item[13].to_i
-#       puts 'true'
-#     end
-#     p "#{sample} #{item[13]}"
-#     sample = sample.join(" ")
-#     p "#{sample} :: #{item[4]} :: #{item[13]}"
-#     i += 1
-#   end
+
+the_item = ""
+master = []
+p web[0][0]
+i = 0
+web[0].length.times do
+  array = []
+  array << web[0][i]
+  master << array
+  i+=1
+end
+
+i = 0
+array = []
+web.each do |item|
+    if item[4].include?("")
+      the_item = item
     end
 end
+
+i = 0
+the_item.length.times do
+  master[i] << the_item[i]
+  i += 1
+end
+master.each do |item|
+  p item
+end
+
+
+
+
 
 # p web[2]
 # def write_file(web)
