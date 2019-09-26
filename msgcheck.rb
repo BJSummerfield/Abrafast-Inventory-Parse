@@ -1,7 +1,7 @@
 
 require 'csv'
 qb = CSV.read('../csv/quickbooks.csv', :encoding => 'windows-1251:utf-8')
-web = CSV.read("../csv/webproducts.csv")
+web = CSV.read("../csv/WP925.csv")
 
 # web.each do |item|
 #   if item[47] != "" && item[47].include?('$') && item[45] == "True"
@@ -18,34 +18,44 @@ web = CSV.read("../csv/webproducts.csv")
 #   end
 # end
 
-
-the_item = ""
-master = []
-p web[0][0]
-i = 0
-web[0].length.times do
-  array = []
-  array << web[0][i]
-  master << array
-  i+=1
-end
-
-i = 0
-array = []
 web.each do |item|
-    if item[4].include?("")
-      the_item = item
-    end
+  if item[47] != "" && item[47].include?('..')
+    p "#{item[47]} #{item[4]}"
+
+  end
 end
 
-i = 0
-the_item.length.times do
-  master[i] << the_item[i]
-  i += 1
-end
-master.each do |item|
-  p item
-end
+
+
+
+
+# the_item = ""
+# master = []
+# p web[0][0]
+# i = 0
+# web[0].length.times do
+#   array = []
+#   array << web[0][i]
+#   master << array
+#   i+=1
+# end
+
+# i = 0
+# array = []
+# web.each do |item|
+#     if item[4].include?("")
+#       the_item = item
+#     end
+# end
+
+# i = 0
+# the_item.length.times do
+#   master[i] << the_item[i]
+#   i += 1
+# end
+# master.each do |item|
+#   p item
+# end
 
 
 

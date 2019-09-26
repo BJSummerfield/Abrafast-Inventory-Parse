@@ -6,7 +6,7 @@ date = DateTime.now
 date = "#{date.month}-#{date.day}-#{date.year}"
 $new_file_name = "#{file_name}-#{date}.csv"
 qb = CSV.read('../csv/quickbooks.csv', :encoding => 'windows-1251:utf-8')
-web = CSV.read("../csv/webproducts.csv")
+web = CSV.read("../csv/WP925.csv")
 
 $items_checked = 0
 $items_changed = 0
@@ -38,7 +38,7 @@ def part_number_match(web_item, qb)
     enabled = web_item[45]
     $qbPN = qb_item[1].split(/:/)[1]
     $webPN = web_item[4]
-    if $qbPN == $webPN
+    if $qbPN != nil && $webPN != nil && $qbPN == $webPN
       price_check(web_item, qb_item)
     end
   end
@@ -50,7 +50,7 @@ def price_check(web_item, qb_item)
   $qbCP = ('%.2f' % qb_item[4]).delete('.').to_i
   if $webCP != $qbCP
     $needs_fix = true
-    if $msg != ""
+    if $msg != "" && $msg != nil
       check_multiples(web_item, qb_item)
     end
   end
@@ -65,7 +65,7 @@ def price_check(web_item, qb_item)
     puts "#{$webPN}"
     puts "Web = $#{'%.2f' % ($webCP / 100.00)} -> QB = $#{'%.2f' % ($qbCP / 100.00)}"
     price_change(web_item, qb_item)
-    if $msg != ""
+    if $msg != "" && @msg != nil
       check_message(web_item)
     end
     $needs_fix = false
@@ -120,14 +120,6 @@ def check_message(web_item)
     web_item[47] = $msg
   end
 end
-
-# def multiple_msg(web_item, msg_break)
-#   msg_break.pop
-#   new_price = '%.2f' % (($qbCP * $pack_size) / 100.00)
-#   msg_break << "$#{new_price}"
-#   $msg = msg_break.join(" ")
-#   $msg_needs_fix = true
-# end
 
 def basic_msg(web_item, msg_break)
   msg_break.pop
