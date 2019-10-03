@@ -1,12 +1,12 @@
 require 'csv'
 require "date"
-file_name = "BlindBolt"
+file_name = "Web_Products"
 
 date = DateTime.now
 date = "#{date.month}-#{date.day}-#{date.year}"
 $new_file_name = "#{file_name}-#{date}.csv"
-qb = CSV.read('../csv/quickbooks.csv', :encoding => 'windows-1251:utf-8')
-web = CSV.read("../csv/WP925.csv")
+qb = CSV.read('../csv/qb100319.csv', :encoding => 'windows-1251:utf-8')
+web = CSV.read("../csv/wp100319.csv")
 
 $items_checked = 0
 $items_changed = 0
@@ -29,7 +29,7 @@ def runner_code(web, qb)
   end
   report
   if $items_changed > 0
-    # write_file(web)
+    write_file(web)
   end
 end
 
@@ -65,7 +65,7 @@ def price_check(web_item, qb_item)
     puts "#{$webPN}"
     puts "Web = $#{'%.2f' % ($webCP / 100.00)} -> QB = $#{'%.2f' % ($qbCP / 100.00)}"
     price_change(web_item, qb_item)
-    if $msg != "" && @msg != nil
+    if $msg != "" && $msg != nil
       check_message(web_item)
     end
     $needs_fix = false
