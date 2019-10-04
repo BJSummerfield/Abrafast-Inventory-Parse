@@ -1,7 +1,7 @@
 
 require 'csv'
 qb = CSV.read('../csv/qb100319.csv', :encoding => 'windows-1251:utf-8')
-web = CSV.read("../csv/wp100319.csv")
+web = CSV.read("../csv/wp100419.csv")
 
 # web.each do |item|
 #   if item[47] != "" && item[47].include?('$') && item[45] == "True"
@@ -19,12 +19,8 @@ web = CSV.read("../csv/wp100319.csv")
 # end
 
 web.each do |item|
-  if item[47] != nil && item[47] != ""
-    if item[47].include?('..')
-      item[47] = item[47].gsub('..','.')
-      p item[47]
-    end
-  end
+  p item[4]
+
 end
 
 # CSV.open("../csv/edit1.CSV", "wb") do |csv|

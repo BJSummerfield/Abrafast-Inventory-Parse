@@ -6,7 +6,7 @@ date = DateTime.now
 date = "#{date.month}-#{date.day}-#{date.year}"
 $new_file_name = "#{file_name}-#{date}.csv"
 qb = CSV.read('../csv/qb100319.csv', :encoding => 'windows-1251:utf-8')
-web = CSV.read("../csv/wp100319.csv")
+web = CSV.read("../csv/wp100319b.csv")
 
 $items_checked = 0
 $items_changed = 0
