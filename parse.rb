@@ -5,8 +5,8 @@ file_name = "Web_Products"
 date = DateTime.now
 date = "#{date.month}-#{date.day}-#{date.year}"
 $new_file_name = "#{file_name}-#{date}.csv"
-qb = CSV.read('../csv/qb100319.csv', :encoding => 'windows-1251:utf-8')
-web = CSV.read("../csv/wp100319b.csv")
+qb = CSV.read('../csv/qb100419.csv', :encoding => 'windows-1251:utf-8')
+web = CSV.read("../csv/wp100719a.csv")
 
 $items_checked = 0
 $items_changed = 0
@@ -29,7 +29,7 @@ def runner_code(web, qb)
   end
   report
   if $items_changed > 0
-    write_file(web)
+    # write_file(web)
   end
 end
 
