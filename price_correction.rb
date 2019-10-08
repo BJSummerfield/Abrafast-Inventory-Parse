@@ -3,7 +3,7 @@ require "date"
 file_name = "Web_Products"
 
 qb = CSV.read('../csv/qb100419.csv', :encoding => 'windows-1251:utf-8')
-web = CSV.read("../csv/wp100719a.csv")
+web = CSV.read("../csv/fix.csv")
 
 date = DateTime.now
 $date = "#{date.month}-#{date.day}-#{date.year}"
@@ -39,8 +39,8 @@ def checker(web,qb)
     end
   end
   report
-  # write_changes(web) if $items_changed != 0
-  # write_no_match(web) if $no_match.length > 0
+  write_changes(web) if $items_changed != 0
+  write_no_match(web) if $no_match.length > 0
 end
 
 def part_number_match(web_item,qb)
