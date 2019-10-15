@@ -1,11 +1,10 @@
 require 'csv'
 original_products = CSV.read('../csv/edit.csv')
 
-@item_name = 'BOA Abrasive Grinding Belt'
-@itemV = {'Width' => [], 'Grit' => []}
-@item_short_desc = 'Various Widths & Grits Available <br> 30" Long - 10 Per Pack'
-@item_catagory = 'Finishing and Polishing Belts & Discs ~ BOA Pipe Sander Abrasive Grinding Belts'
-
+@item_name = 'CS Unitec 10 Series Once-Touch TCT Annular Cutter'
+@itemV = {'Cutter Size' => [],'Depth' => []}
+@item_short_desc = 'Various Cutter Sizes & Depths Available'
+@item_catagory = 'Power Tools and Accessories ~ Portable Magnetic Drills, Annular Cutters & Step Drill Kits ~ CS Unitec Annular Cutters'
 @original = []
 
 def runner(original_products)
@@ -14,32 +13,63 @@ def runner(original_products)
   save_file('original')
   product_fix
   save_file('copy')
+  variation_sort
   parent_fix(create_parent)
   save_file('parent')
   merge_files
   delete_files
+  p @original[1]['Variations']
 end
 
 def special_case(item)
   item['vars'] = {}
   itemV = item['vars']
-  itemV['Width'] = item['Name'].split(' ')[-3]
-  @itemV['Width'] << itemV['Width'] unless @itemV['Width'].include?(itemV['Width'])
-  item['vars']['Grit'] = item['Name'].split(' ')[4]
-  item['vars']['Grit'] = item['Name'].split(' ')[4] + " Aluminum Oxide" if item['Name'].include?('Aluminum')
-  @itemV['Grit'] << itemV['Grit'] unless @itemV['Grit'].include?(itemV['Grit'])
+  item['Name'] = item['Name'].gsub('  ', " ")
+  item['Name'] = item['Name'].gsub('2-3/4 -', '2-3/4" x ')
+  item['Name'] = item['Name'].gsub('2-5/8 -', '2-5/8" x ')
+  item['Name'] = item['Name'].gsub('2-1/2 -', '2-1/2" x ')
+  item['Name'] = item['Name'].gsub('2-7/16 -', '2-7/16" x ')
+  item['Name'] = item['Name'].gsub('2-3/8 -', '2-3/8" x ')
+  item['Name'] = item['Name'].gsub('2-3/8 -', '2-3/8" x ')
+  item['Name'] = item['Name'].gsub('2-5/16 -', '2-5/16" x ')
+  item['Name'] = item['Name'].gsub('2-1/4 -', '2-1/4" x ')
+  item['Name'] = item['Name'].gsub('2-3/16 -', '2-3/16" x ')
+  item['Name'] = item['Name'].gsub('2-1/8 -', '2-1/8" x ')
+  item['Name'] = item['Name'].gsub('2-1-3/8"', '2" x 1-3/8"')
+  item['Name'] = item['Name'].gsub('2-2-3/8"', '2" x 2-3/8"')
+  item['Name'] = item['Name'].gsub('2-1/16 -', '2-1/16" x ')
+  item['Name'] = item['Name'].gsub('2-2-3/8"', '2" x 3/8"')
+  item['Name'] = item['Name'].gsub('1-15/16-', '1-15/16" x ')
+  item['Name'] = item['Name'].gsub('1-7/8-', '1-7/8" x ')
+  item['Name'] = item['Name'].gsub('1-13/16-', '1-13/16" x ')
+  itemV['Cutter Size'] = item['Name'].split(' ')[-4]
+  if itemV['Cutter Size'] == 'Cutter'
+    p item['Name']
+  end
+  @itemV['Cutter Size'] << itemV['Cutter Size'] unless @itemV['Cutter Size'].include?(itemV['Cutter Size'])
+  item['vars']['Depth'] = item['Name'].split(' ')[-2]
+  @itemV['Depth'] << itemV['Depth'] unless @itemV['Depth'].include?(itemV['Depth'])
 end
 
 def parent_fix(parent)
   np = parent[1]
   np['Name'] = @item_name
   np['ShortDescription'] = @item_short_desc
-  np['Catagories'] = @item_catagory
+  np['Categories'] = @item_catagory
   np['Variations'] = variations
   np['ManufacturerPartNumber'] = nil
   np['ManufacturerName'] = nil
   np['PriceMessage'] = nil
+  np['PartNumber'] = nil
+  np['Delete'] = "False"
+  np['ProductID'] = nil
   return parent
+end
+
+def variation_sort
+  @itemV.sort_by do |k,v|
+    @itemV[k] = v.sort_by {|s| s.split('-').map(&:to_r).inject(:+)}
+  end
 end
 
 def variations
@@ -47,9 +77,9 @@ def variations
   i = @itemV.length
   @itemV.each do |key, value|
     var += "#{key} |" if i == @itemV.length
-    var += "~#{key}|" if i != @itemV.length
+    var += " ~#{key}|" if i != @itemV.length
     value.each do |v|
-      var += "#{v};"
+      var += " #{v};"
     end
     i -= 1
   end
@@ -83,7 +113,7 @@ end
 def product_fix
   i = 0
   @original.each do |item|
-    if i != 0
+    if i != 0 && item['Variations'] == nil
       special_case(item)
       nameloop(item)
       attribute_fix(item)
@@ -133,7 +163,7 @@ def save_file(filename)
 end
 
 def merge_files
-  system('csvstack ../csv/original.csv ../csv/parent.csv ../csv/copy.csv > ../csv/Fix.csv')
+  system('csvstack ../csv/parent.csv ../csv/original.csv ../csv/copy.csv > ../csv/Fix.csv')
 end
 
 def delete_files
@@ -141,3 +171,4 @@ def delete_files
 end
 
 runner(original_products)
+
