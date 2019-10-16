@@ -1,10 +1,10 @@
 require 'csv'
 original_products = CSV.read('../csv/edit.csv')
 
-@item_name = 'CS Unitec 10 Series Once-Touch TCT Annular Cutter'
-@itemV = {'Cutter Size' => [],'Depth' => []}
-@item_short_desc = 'Various Cutter Sizes & Depths Available'
-@item_catagory = 'Power Tools and Accessories ~ Portable Magnetic Drills, Annular Cutters & Step Drill Kits ~ CS Unitec Annular Cutters'
+@item_name = 'Blind Bolt A4 Stainless Steel'
+@itemV = {'Finish' => [],'Bolt Diameter & Length' => []}
+@item_short_desc = 'Available in 304 & 316 Stainless Steel'
+@item_catagory = 'Blind Bolts ~ Blind Bolt'
 @original = []
 
 def runner(original_products)
@@ -24,31 +24,12 @@ end
 def special_case(item)
   item['vars'] = {}
   itemV = item['vars']
-  item['Name'] = item['Name'].gsub('  ', " ")
-  item['Name'] = item['Name'].gsub('2-3/4 -', '2-3/4" x ')
-  item['Name'] = item['Name'].gsub('2-5/8 -', '2-5/8" x ')
-  item['Name'] = item['Name'].gsub('2-1/2 -', '2-1/2" x ')
-  item['Name'] = item['Name'].gsub('2-7/16 -', '2-7/16" x ')
-  item['Name'] = item['Name'].gsub('2-3/8 -', '2-3/8" x ')
-  item['Name'] = item['Name'].gsub('2-3/8 -', '2-3/8" x ')
-  item['Name'] = item['Name'].gsub('2-5/16 -', '2-5/16" x ')
-  item['Name'] = item['Name'].gsub('2-1/4 -', '2-1/4" x ')
-  item['Name'] = item['Name'].gsub('2-3/16 -', '2-3/16" x ')
-  item['Name'] = item['Name'].gsub('2-1/8 -', '2-1/8" x ')
-  item['Name'] = item['Name'].gsub('2-1-3/8"', '2" x 1-3/8"')
-  item['Name'] = item['Name'].gsub('2-2-3/8"', '2" x 2-3/8"')
-  item['Name'] = item['Name'].gsub('2-1/16 -', '2-1/16" x ')
-  item['Name'] = item['Name'].gsub('2-2-3/8"', '2" x 3/8"')
-  item['Name'] = item['Name'].gsub('1-15/16-', '1-15/16" x ')
-  item['Name'] = item['Name'].gsub('1-7/8-', '1-7/8" x ')
-  item['Name'] = item['Name'].gsub('1-13/16-', '1-13/16" x ')
-  itemV['Cutter Size'] = item['Name'].split(' ')[-4]
-  if itemV['Cutter Size'] == 'Cutter'
-    p item['Name']
-  end
-  @itemV['Cutter Size'] << itemV['Cutter Size'] unless @itemV['Cutter Size'].include?(itemV['Cutter Size'])
-  item['vars']['Depth'] = item['Name'].split(' ')[-2]
-  @itemV['Depth'] << itemV['Depth'] unless @itemV['Depth'].include?(itemV['Depth'])
+  itemV['Bolt Diameter & Length'] = item['Name'].split('| ')[-1]
+  @itemV['Bolt Diameter & Length'] << itemV['Bolt Diameter & Length'] unless @itemV['Bolt Diameter & Length'].include?(itemV['Cutter Size'])
+  item['vars']['Finish'] = "316 Stainless Steel"
+  item['vars']['Finish'] = "304 Stainless Steel" if item['Name'].include?('3/8')
+
+  @itemV['Finish'] << itemV['Finish'] unless @itemV['Finish'].include?(itemV['Finish'])
 end
 
 def parent_fix(parent)
