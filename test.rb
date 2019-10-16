@@ -1,10 +1,10 @@
 require 'csv'
 original_products = CSV.read('../csv/edit.csv')
 
-@item_name = 'Blind Bolt A4 Stainless Steel'
-@itemV = {'Finish' => [],'Bolt Diameter & Length' => []}
-@item_short_desc = 'Available in 304 & 316 Stainless Steel'
-@item_catagory = 'Blind Bolts ~ Blind Bolt'
+@item_name = 'Backing Disc with PUR Foam Absorption Coating and Centering Pin'
+@itemV = {'Diameter' => []}
+@item_short_desc = 'Fix Hook & Loop Backing Pad <br> 5/8"-11'
+@item_catagory = 'VARILEX WSF 1800 ~ VARILEX WSF 1800 Accessories'
 @original = []
 
 def runner(original_products)
@@ -24,12 +24,12 @@ end
 def special_case(item)
   item['vars'] = {}
   itemV = item['vars']
-  itemV['Bolt Diameter & Length'] = item['Name'].split('| ')[-1]
-  @itemV['Bolt Diameter & Length'] << itemV['Bolt Diameter & Length'] unless @itemV['Bolt Diameter & Length'].include?(itemV['Cutter Size'])
-  item['vars']['Finish'] = "316 Stainless Steel"
-  item['vars']['Finish'] = "304 Stainless Steel" if item['Name'].include?('3/8')
+  itemV['Diameter'] = item['Name'].split(' ')[-6]
+  @itemV['Diameter'] << itemV['Diameter'] unless @itemV['Diameter'].include?(itemV['Diameter'])
+  # item['vars']['Finish'] = "316 Stainless Steel"
+  # item['vars']['Finish'] = "304 Stainless Steel" if item['Name'].include?('3/8')
 
-  @itemV['Finish'] << itemV['Finish'] unless @itemV['Finish'].include?(itemV['Finish'])
+  # @itemV['Finish'] << itemV['Finish'] unless @itemV['Finish'].include?(itemV['Finish'])
 end
 
 def parent_fix(parent)
