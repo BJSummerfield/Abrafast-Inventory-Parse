@@ -4,7 +4,8 @@ edit = CSV.read('../csv/edit.csv')
 i = 0
 edit.each do |item|
   if i != 0
-    item[17] = "True"
+    item[0] = nil
+    item[35] = item[35].gsub('CordlessImpactWrenchesDrillsBandSaws&Acc.', 'Metabo')
   end
   i += 1
 end
