@@ -1,6 +1,6 @@
 require 'csv'
 
-products = CSV.read('../csv/wp102319.csv')
+products = CSV.read('../csv/wp102419.csv')
 path = '../images/products/detail'
 
 

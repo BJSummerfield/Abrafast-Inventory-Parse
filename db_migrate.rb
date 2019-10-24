@@ -1,6 +1,6 @@
 require 'csv'
 
-ns_db = CSV.read('../csv/wp102319.csv')
+ns_db = CSV.read('../csv/wp102419.csv')
 wp_db = CSV.read('../csv/wordscheema.csv')
 
 
@@ -19,8 +19,8 @@ def export_products
       @export_array = {}
       export_id(product)
       export_type(product)
-      export_sku(product)
       export_name(product)
+      export_sku(product)
       export_published(product)
       export_featured(product)
       export_visibility(product)
@@ -33,8 +33,9 @@ def export_products
       export_extras2(product)
       export_images(product)
       export_extras3(product)
-      export_attributes(product)
       export_parent_product(product)
+      export_attributes(product)
+
       @wp_db_hash << @export_array
     end
   end
@@ -55,9 +56,11 @@ end
 
 def export_parent_product(product)
   if @export_array['Type'] == 'variation'
-    @export_array['Parent'] = @export_array['Name']
-  else
-    @export_array['Parent'] == nil
+    @export_array['Parent'] = @export_array['Name'].split(' - ')[0]
+  elsif @export_array['Type'] == 'variable'
+    @export_array['Parent'] = nil
+  elsif @export_array['Type'] == 'simple'
+    @export_array['Parent'] = nil
   end
 end
 
@@ -82,6 +85,7 @@ def export_attributes(product)
   end
 end
 
+#look here tom. morning
 def extract_child(product)
   var_array = extract_child_variations(product)
   i = 1
