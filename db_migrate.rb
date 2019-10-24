@@ -16,32 +16,104 @@ end
 def export_products
   @ns_db_hash.each do |product|
     if product['Enable'] == 'True'
+      p product["Name"]
       @export_array = {}
       export_id(product)
+      p 'id export'
       export_type(product)
       export_sku(product)
       export_name(product)
+      p 'name export'
       export_published(product)
       export_featured(product)
       export_visibility(product)
       export_short_description(product)
+      p "short desc"
       export_description(product)
       export_extras(product)
       export_weight(product)
       export_extras1(product)
       export_categories(product)
+      p "categories"
       export_extras2(product)
       export_images(product)
       export_extras3(product)
       export_attributes(product)
+      p "attributes"
 
       @wp_db_hash << @export_array
+      p " "
+      p " "
+    end
+  end
+  write_export
+end
+
+def write_export
+  CSV.open("../csv/test_import.csv", "wb") do |csv|
+    @wp_db_hash.each do |item|
+      input_array = []
+      item.each do |k,v|
+        input_array << v
+      end
+      csv << input_array
     end
   end
 end
 
 def export_attributes(product)
+  if product['Variations'] != nil
+    var_array = extract_variations(product)
+    i = 1
+    var_array.each do |variation|
+      variation.each do |k , v|
+        @export_array["Attribute #{i} name"] = k
+        value_string = ""
+        v.each do | value|
+          if value == v.last
+            value_string += value
+          else
+            value_string += value+", "
+          end
+        end
+        @export_array["Attribute #{i} value(s)"] = value_string
+        # p @export_array["Attribute #{i} value(s)"]
+        @export_array["Attribute #{i} visible"] = 1
+        @export_array["Attribute #{i} global"] = 0
+        i += 1
+      end
+    end
+  else
+    @export_array['Attribute 1 name'] = nil
+    @export_array['Attribute 1 value(s)'] = nil
+    @export_array['Attribute 1 visible'] = nil
+    @export_array['Attribute 1 global'] = nil
+    @export_array['Attribute 2 name'] = nil
+    @export_array['Attribute 2 value(s)'] = nil
+    @export_array['Attribute 2 visible'] = nil
+    @export_array['Attribute 2 global'] = nil
+    @export_array['Attribute 3 name'] = nil
+    @export_array['Attribute 3 value(s)'] = nil
+    @export_array['Attribute 3 visible'] = nil
+    @export_array['Attribute 3 global'] = nil
+  end
 end
+
+def extract_variations(product)
+  variations = product['Variations'].split('; ~')
+  var_array =[]
+  variations.each do |var|
+    var_hash = {}
+    var = var.gsub('|  ', '| ')
+    var = var.split('| ')
+    values = var[1].split(';')
+    values.pop if values.last == " "
+    var_hash["#{var[0]}"] = values
+    var_array << var_hash
+  end
+  return var_array
+end
+
 
 def export_extras3(product)
   @export_array['Download limit'] = nil
@@ -191,32 +263,3 @@ def convert_to_hash(db)
 end
 
 runner(ns_db, wp_db)
-# p @wp_db_hash[5]
-#  @wp_db_hash.each do |product|
-#   p "#{product["Type"]} - #{product['Name']}"
-# end
-
-
-
-
- # ['Download limit']
- # ['Download expiry days']
- # ['Parent']
- # ['Grouped products']
- # ['Upsells']
- # ['Cross-sells']
- # ['External URL']
- # ['Button text']
- # ['Position']
- # ['Attribute 1 name']
- # ['Attribute 1 value(s)']
- # ['Attribute 1 visible']
- # ['Attribute 1 global']
- # ['Attribute 2 name']
- # ['Attribute 2 value(s)']
- # ['Attribute 2 visible']
- # ['Attribute 2 global']
- # ['Attribute 3 name']
- # ['Attribute 3 value(s)']
- # ['Attribute 3 visible']
- # ['Attribute 3 global']
