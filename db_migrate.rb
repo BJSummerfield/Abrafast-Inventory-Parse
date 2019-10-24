@@ -16,34 +16,26 @@ end
 def export_products
   @ns_db_hash.each do |product|
     if product['Enable'] == 'True'
-      p product["Name"]
       @export_array = {}
       export_id(product)
-      p 'id export'
       export_type(product)
       export_sku(product)
       export_name(product)
-      p 'name export'
       export_published(product)
       export_featured(product)
       export_visibility(product)
       export_short_description(product)
-      p "short desc"
       export_description(product)
       export_extras(product)
       export_weight(product)
       export_extras1(product)
       export_categories(product)
-      p "categories"
       export_extras2(product)
       export_images(product)
       export_extras3(product)
       export_attributes(product)
-      p "attributes"
-
+      export_parent_product(product)
       @wp_db_hash << @export_array
-      p " "
-      p " "
     end
   end
   write_export
@@ -61,28 +53,19 @@ def write_export
   end
 end
 
+def export_parent_product(product)
+  if @export_array['Type'] == 'variation'
+    @export_array['Parent'] = @export_array['Name']
+  else
+    @export_array['Parent'] == nil
+  end
+end
+
 def export_attributes(product)
-  if product['Variations'] != nil
-    var_array = extract_variations(product)
-    i = 1
-    var_array.each do |variation|
-      variation.each do |k , v|
-        @export_array["Attribute #{i} name"] = k
-        value_string = ""
-        v.each do | value|
-          if value == v.last
-            value_string += value
-          else
-            value_string += value+", "
-          end
-        end
-        @export_array["Attribute #{i} value(s)"] = value_string
-        # p @export_array["Attribute #{i} value(s)"]
-        @export_array["Attribute #{i} visible"] = 1
-        @export_array["Attribute #{i} global"] = 0
-        i += 1
-      end
-    end
+  if @export_array['Type'] == 'variable'
+    extract_parent(product)
+  elsif @export_array['Type'] == 'variation'
+    extract_child(product)
   else
     @export_array['Attribute 1 name'] = nil
     @export_array['Attribute 1 value(s)'] = nil
@@ -96,6 +79,46 @@ def export_attributes(product)
     @export_array['Attribute 3 value(s)'] = nil
     @export_array['Attribute 3 visible'] = nil
     @export_array['Attribute 3 global'] = nil
+  end
+end
+
+def extract_child(product)
+  var_array = extract_child_variations(product)
+  i = 1
+  var_array.length / 2.times do
+    @export_array["Attribute #{i} name"] = var_array.shift
+    @export_array["Attribute #{i} value(s)"] = var_array.shift
+    @export_array["Attribute #{i} visible"] = 1
+    @export_array["Attribute #{i} global"] = 0
+    i += 1
+  end
+end
+
+def extract_child_variations(product)
+  variations = product['Name'].gsub(';','| ').split('| ')
+  variations.shift
+  return variations
+end
+
+def extract_parent(product)
+  var_array = extract_variations(product)
+  i = 1
+  var_array.each do |variation|
+    variation.each do |k , v|
+      @export_array["Attribute #{i} name"] = k
+      value_string = ""
+      v.each do | value|
+        if value == v.last
+          value_string += value
+        else
+          value_string += value+", "
+        end
+      end
+      @export_array["Attribute #{i} value(s)"] = value_string
+      @export_array["Attribute #{i} visible"] = 1
+      @export_array["Attribute #{i} global"] = 0
+      i += 1
+    end
   end
 end
 
@@ -118,7 +141,6 @@ end
 def export_extras3(product)
   @export_array['Download limit'] = nil
   @export_array['Download expiry days'] = nil
-  @export_array['Parent'] = nil
   @export_array['Grouped products'] = nil
   @export_array['Upsells'] = nil
   @export_array['Cross-sells'] = nil
@@ -129,7 +151,18 @@ end
 
 
 def export_images(product)
-  @export_array['Images'] = nil
+  filepath = product["Name"].split(" ").join("").split('|')[0]
+  filepath = filepath.gsub(' ','')
+  filepath = filepath.gsub('(','')
+  filepath = filepath.gsub(')','')
+  filepath = filepath.gsub('/','')
+  filepath = filepath.gsub('&','')
+  filepath = filepath.gsub('','')
+  filepath = filepath.gsub('.','')
+  filepath = filepath.gsub('"','')
+  filepath = filepath.gsub("'",'')
+  filepath = filepath.gsub(",",'')
+  @export_array['Images'] = "http://localhost:8000/wp-content/uploads/2019/10/#{filepath}.jpg"
 end
 
 def export_extras2(product)
@@ -139,7 +172,7 @@ end
 
 def export_categories(product)
   if product['Categories']
-    @export_array["Categories"] = product['Categories'].gsub('~',">") + ', Uncategorized'
+    @export_array["Categories"] = product['Categories'].gsub('~',">")
   else
     @export_array['Categories'] = nil
   end
@@ -231,7 +264,11 @@ def export_name(product)
 end
 
 def export_sku(product)
-  @export_array['SKU'] = product['PartNumber']
+  if @export_array['Type'] == 'variable'
+    @export_array["SKU"] = @export_array['Name']
+  else
+    @export_array['SKU'] = product['PartNumber']
+  end
 end
 
 def export_type(product)

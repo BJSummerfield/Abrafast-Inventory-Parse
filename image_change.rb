@@ -12,6 +12,7 @@ products.each do |product|
   if product[45] == 'True'
     file = product[40].split('/').last if product[40]
     product_name = product[1].split(" ").join("")
+    product_name = product_name.split('|')[0] if product_name.include?('|')
     product_name = product_name.gsub(' ','')
     product_name = product_name.gsub('(','')
     product_name = product_name.gsub(')','')
@@ -35,7 +36,7 @@ end
     origin = path+'/'+f
     destination = '../new_images/'+pn+'.'+f.split('.').last
        # p destination
-       # system("cp #{origin} #{destination}")
+       system("cp #{origin} #{destination}")
     end
   end
 
