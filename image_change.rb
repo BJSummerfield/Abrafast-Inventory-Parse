@@ -23,8 +23,8 @@ products.each do |product|
     product_name = product_name.gsub('"','')
     product_name = product_name.gsub("'",'')
     product_name = product_name.gsub(",",'')
-    p file
-    p product_name
+    # p file
+    # p product_name
     array << product_name if product_name && file
     array << file if file && product_name
     product_images << array unless product_images.include?(array)
@@ -33,10 +33,15 @@ end
 
   product_images.each do | pn, f |
     if f != nil
+    # p pn
     origin = path+'/'+f
     destination = '../new_images/'+pn+'.'+f.split('.').last
-       # p destination
+       p destination
+       # p destination.gsub(f.split('.').last,'jpg')
        system("cp #{origin} #{destination}")
+       if f.split('.').last != 'jpg'
+        system("sips -s format jpeg #{destination} --out #{destination.gsub(f.split('.').last,'jpg')}")
+      end
     end
   end
 
@@ -46,7 +51,7 @@ end
     #    # p destination
     #    system("cp #{origin} #{destination}")
     # end
-puts product_images.length
-p product_images[0]
+# puts product_images.length
+# p product_images[0]
 
 

@@ -1,6 +1,6 @@
 require 'csv'
 
-ns_db = CSV.read('../csv/wp102419.csv')
+ns_db = CSV.read('../csv/wp102519.csv')
 wp_db = CSV.read('../csv/wordscheema.csv')
 
 
@@ -40,10 +40,94 @@ def export_products
     end
   end
   write_export
+  fix_export
+  write_sort
+end
+
+def write_sort
+  CSV.open("../csv/sorted_import.csv", "wb") do |csv|
+    @wp_db_hash.each do |item|
+      input_array = []
+      item.each do |k,v|
+        input_array << v
+      end
+     csv << input_array
+    end
+  end
+end
+
+
+def fix_export
+  export = CSV.read('../csv/test_import.csv')
+  @wp_db_hash = []
+  create_import_hash(export)
+  @wp_db_hash.each do |product|
+    @matchfound = false
+    if product['Type'] == 'variation'
+      x = pull_variations(product)
+      if @matchfound == true
+        attributes = sort_variations(x)
+        write_attributes(product, attributes)
+      end
+    end
+  end
+end
+
+def write_attributes(product, attributes)
+  i = 0
+  j = 1
+  3.times do
+    product["Attribute #{j} name"] = attributes[i][0]
+    product["Attribute #{j} value(s)"] = attributes[i][1]
+    i += 1
+    j += 1
+  end
+end
+
+def sort_variations(x)
+  key = []
+  value = []
+  i = 0
+  3.times do
+    key << x[1][i][0]
+    i += 1
+  end
+  key.each do |k|
+    i = 0
+    j = 1
+    3.times do
+      value << x[0][i] if x[0][i].include?(k)
+      i +=1
+    end
+  end
+  return value
+end
+
+def pull_variations(product)
+  @wp_db_hash.each do |pparent|
+    if product['Parent'] == pparent['SKU']
+      @matchfound = true
+      j = [product,pparent]
+      x = []
+      j.each do |unit|
+        y = []
+        i = 1
+        3.times do
+          h = []
+          h << unit["Attribute #{i} name"]
+          h << unit["Attribute #{i} value(s)"]
+          y << h
+          i += 1
+        end
+        x << y
+      end
+      return x
+    end
+  end
 end
 
 def write_export
-  CSV.open("../csv/test_import.csv", "wb") do |csv|
+  CSV.open("../csv/test_import1.csv", "wb") do |csv|
     @wp_db_hash.each do |item|
       input_array = []
       item.each do |k,v|
@@ -52,6 +136,8 @@ def write_export
       csv << input_array
     end
   end
+  system('csvsort -c 2 ../csv/test_import1.csv -I > ../csv/test_import.csv')
+  system('rm ../csv/test_import1.csv')
 end
 
 def export_parent_product(product)
@@ -85,11 +171,10 @@ def export_attributes(product)
   end
 end
 
-#look here tom. morning
 def extract_child(product)
   var_array = extract_child_variations(product)
   i = 1
-  var_array.length / 2.times do
+  (var_array.length/2).times do
     @export_array["Attribute #{i} name"] = var_array.shift
     @export_array["Attribute #{i} value(s)"] = var_array.shift
     @export_array["Attribute #{i} visible"] = 1
@@ -265,6 +350,7 @@ def export_name(product)
       i += 2
     end
   end
+  @export_array['Name'] = @export_array['Name'].gsub('&','and')
 end
 
 def export_sku(product)
