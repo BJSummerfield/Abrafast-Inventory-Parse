@@ -1,6 +1,6 @@
 require 'csv'
 
-products = CSV.read('../csv/wp102419.csv')
+products = CSV.read('../csv/wp102819.csv')
 path = '../images/products/detail'
 
 
@@ -23,6 +23,8 @@ products.each do |product|
     product_name = product_name.gsub('"','')
     product_name = product_name.gsub("'",'')
     product_name = product_name.gsub(",",'')
+    product_name = product_name.gsub("#",'')
+    product_name = product_name.gsub("Â°",'')
     # p file
     # p product_name
     array << product_name if product_name && file
@@ -39,8 +41,11 @@ end
        p destination
        # p destination.gsub(f.split('.').last,'jpg')
        system("cp #{origin} #{destination}")
-       if f.split('.').last != 'jpg'
+       if f.split('.').last == 'JPG'
+        system("mv #{destination} #{destination.gsub('JPG','jpg')}")
+       elsif f.split('.').last != 'jpg'
         system("sips -s format jpeg #{destination} --out #{destination.gsub(f.split('.').last,'jpg')}")
+        system("rm #{destination}")
       end
     end
   end

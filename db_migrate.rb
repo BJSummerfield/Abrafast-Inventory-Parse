@@ -1,6 +1,6 @@
 require 'csv'
 
-ns_db = CSV.read('../csv/wp102519.csv')
+ns_db = CSV.read('../csv/wp102819.csv')
 wp_db = CSV.read('../csv/wordscheema.csv')
 
 
@@ -33,6 +33,7 @@ def export_products
       export_extras2(product)
       export_images(product)
       export_extras3(product)
+      export_mpn(product)
       export_parent_product(product)
       export_attributes(product)
 
@@ -56,6 +57,9 @@ def write_sort
   end
 end
 
+def export_mpn(product)
+  @export_array['Meta: _wpm_gtin_code'] = product['ManufacturerPartNumber']
+end
 
 def fix_export
   export = CSV.read('../csv/test_import.csv')
@@ -251,6 +255,9 @@ def export_images(product)
   filepath = filepath.gsub('"','')
   filepath = filepath.gsub("'",'')
   filepath = filepath.gsub(",",'')
+  filepath = filepath.gsub("#",'')
+  filepath = filepath.gsub("Â°",'')
+
   @export_array['Images'] = "http://localhost:8000/wp-content/uploads/2019/10/#{filepath}.jpg"
 end
 
@@ -302,25 +309,35 @@ end
 
 def export_short_description(product)
   qty = price_message(product['PriceMessage'])
-  mfg = product['ManufacturerName'] if product['ManufacturerName'] != nil
-  mfgpn = product['ManufacturerPartNumber'] if product['ManufacturerPartNumber'] != nil
-  write_short_desc(qty, mfg, mfgpn)
+  mfg = product['ManufacturerName']
+  write_short_desc(qty, mfg)
 end
 
-def write_short_desc(qty, mfg, mfgpn)
+def write_short_desc(qty, mfg)
   msg = ""
-  msg += "<p>Manufacturer: #{mfg}</p>" if mfg
-  msg += "<p>Manufacturer Part Number: #{mfgpn}</p>" if mfgpn
-  msg += "<p>Quantity: #{qty}</p>" if qty
+  msg += "<p>Manufacturer: #{mfg}</p>" if mfg != nil
+  msg += "<p>Quantity: #{qty}</p>" if qty != nil
   @export_array['Short description'] = msg
+  p "#{@export_array['Short description']} - #{@export_array['Name']}"
 end
 
 def price_message(pm)
-  return '1' if pm == nil
-  split = pm.split(' ')
-  return "#{pm.split(' = ')[0]}" if split[0].to_i != 0
-  return '1' if split[-3].to_i == 0
-  return "#{split[-3]}" if split[-3].to_i != 0
+  if @export_array['Type'] == 'simple'
+    return nil
+  end
+  if @export_array['Type'] == 'variable'
+    return nil
+  end
+  if pm != nil
+    split = pm.split(' ')
+    if split[0].to_i != 0
+      return "#{pm.split(' = ')[0]}"
+    elsif split[-3].to_i == 0
+      return '1'
+    elsif split[-3].to_i != 0
+      return "#{split[-3]}"
+    end
+  end
 end
 
 def export_visibility(product)
@@ -336,6 +353,7 @@ def export_published(product)
 end
 
 def export_name(product)
+  product['Name'] = product['Name'].gsub("Â°",'')
   product['Name'] = product['Name'].gsub(' - ', '-')
   if @export_array['Type'] == 'simple' || @export_array['Type'] == 'variable'
     @export_array['Name'] = product['Name']
